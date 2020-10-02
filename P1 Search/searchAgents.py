@@ -339,7 +339,6 @@ class CornersProblem(search.SearchProblem):
                     if corners[i] == (nextx, nexty):
                         break
                 corners = corners[:i] + corners[i+1:]
-                
             if not hitsWall:
                 nextState = ((nextx, nexty), corners)
                 cost = 1
@@ -380,40 +379,8 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    distance = 0
-    cornersLeft = list(state[1])
-    pacman = state[0]
-    closest = 0
-    cornersList = []
-    minI = 0
-    distance_to_nearest = 0
-    total = 0
     
-    if len(cornersLeft) > 0:
-        for i in range(len(cornersLeft)):
-            corner = cornersLeft[i]
-            cornersList.append(abs(pacman[0] - corner[0]) + abs(pacman[1] - corner[1]))
-        distance_to_nearest = min(cornersList)      
-        minI = cornersList.index(distance_to_nearest)
-        closest = cornersLeft[minI]
-      
-        cornersLeft.remove(closest)
-        while len(cornersLeft) > 0:
-          distanceList = []
-          xy1 = closest
-          for i in range(len(cornersLeft)):
-              xy2 = cornersLeft[i]
-              distanceList.append(abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1]))
-          closest2 = min(distanceList)
-          minI = distanceList.index(closest2)
-          closest = cornersLeft[minI]
-          cornersLeft.remove(closest)
-          
-          total = total + closest2
-        distance = distance_to_nearest + total
-      
-    return distance
-    return 0 # Default to trivial solution
+    # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -507,7 +474,31 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    maximum=-1
+    maxdot=position
+    for food in foodGrid.asList():
+        distance=abs(position[0]-food[0])+abs(position[1]-food[1])
+        if(distance>maximum):
+            maximum=distance
+            maxdot=food
+    dim=position[0]-maxdot[0]
+
+    foodCount=0
+    for food in foodGrid.asList():
+        if dim>0:
+            if (position[0]-food[0])<0 :
+                foodCount+=1
+        elif dim<0:
+            if (position[0]-food[0])>0 :
+                foodCount+=1
+        else:
+            if (position[0]-food[0])!=0 :
+                foodCount+=1
+    
+    if maximum < 0:
+        maximum = 0
+
+    return maximum + foodCount
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -538,7 +529,11 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        startPosition = gameState.getPacmanPosition()
+        food = gameState.getFood()
+        walls = gameState.getWalls()
+        problem = AnyFoodSearchProblem(gameState)
+        return search.aStarSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -572,7 +567,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
+        return self.food[x][y]
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
