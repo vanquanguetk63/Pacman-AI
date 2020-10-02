@@ -95,7 +95,6 @@ def depthFirstSearch(problem):
 
     while not stack.isEmpty():
         currentNode, path, nodeNum = stack.pop()
-
         if currentNode not in hasVisited:
             hasVisited.add(currentNode)
             if (problem.isGoalState(currentNode)):
@@ -105,7 +104,7 @@ def depthFirstSearch(problem):
                 if successor[0] not in hasVisited:
                     stack.push((successor[0], path + [successor[1]], nodeNum + successor[2]))
 
-    return []
+ 
     
     
 
@@ -119,39 +118,37 @@ def breadthFirstSearch(problem):
 
     while not queue.isEmpty():
         currentNode, path, nodeNum = queue.pop()
-
         if currentNode not in hasVisited:
             hasVisited.add(currentNode)
             if (problem.isGoalState(currentNode)):
                 return path
-            successor = problem.getSuccessors(currentNode)
-            for successor in successor:
+            successors = problem.getSuccessors(currentNode)
+            for successor in successors:
                 if successor[0] not in hasVisited:
                     queue.push((successor[0], path + [successor[1]], nodeNum + successor[2]))
-    return []
+
 
     
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    fringe = util.PriorityQueue()
-    visited = set()
+    priorityQueue = util.PriorityQueue()
+    hasVisited = set()
     startState = (problem.getStartState(), [], 0)
-    fringe.push(startState, 0)
+    priorityQueue.push(startState, 0)
 
-    while not fringe.isEmpty():
-        currentNode, path, nodeCost = fringe.pop()
-        if currentNode not in visited:
-            visited.add(currentNode)
+    while not priorityQueue.isEmpty():
+        currentNode, path, nodeNum = priorityQueue.pop()
+        if currentNode not in hasVisited:
+            hasVisited.add(currentNode)
             if (problem.isGoalState(currentNode)):
                 return path
             successors = problem.getSuccessors(currentNode)
-            for state, direc, cost in successors:
-                fringe.push((state, path + [direc], nodeCost + cost), nodeCost + cost)
-
-
-    return []
+            for successor in successors:
+                if successor[0] not in hasVisited:
+                    priorityQueue.push((successor[0], path + [successor[1]], nodeNum + successor[2]), nodeNum + successor[2])
+ 
 
 def nullHeuristic(state, problem=None):
     """
@@ -163,7 +160,22 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    priorityQueue = util.PriorityQueue()
+    visited = set()
+    startState = (problem.getStartState(), [], 0)
+    priorityQueue.push(startState, 0)
+
+    while not priorityQueue.isEmpty():
+        currentNode, path, nodeCost = priorityQueue.pop()
+        if currentNode not in visited:
+            visited.add(currentNode)
+            if problem.isGoalState(currentNode):
+                return path
+            successors = problem.getSuccessors(currentNode)
+            for successor in successors:
+                if successor[0] not in visited:
+                    priorityQueue.push((successor[0], path + [successor[1]], nodeCost + successor[2]), nodeCost + successor[2] + heuristic(successor[0] , problem))
+
 
 
 # Abbreviations
