@@ -101,24 +101,57 @@ def depthFirstSearch(problem):
             if (problem.isGoalState(currentNode)):
                 return path
             successor = problem.getSuccessors(currentNode)
-            for state, direc, num in successor:
-                if state not in hasVisited:
-                    stack.push((state, path + [direc], nodeNum + num))
+            for successor in successor:
+                if successor[0] not in hasVisited:
+                    stack.push((successor[0], path + [successor[1]], nodeNum + successor[2]))
 
     return []
-
     
     
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.Queue()
+    hasVisited = set()
+    startState = (problem.getStartState(), [] , 0)
+    queue.push(startState)
+
+    while not queue.isEmpty():
+        currentNode, path, nodeNum = queue.pop()
+
+        if currentNode not in hasVisited:
+            hasVisited.add(currentNode)
+            if (problem.isGoalState(currentNode)):
+                return path
+            successor = problem.getSuccessors(currentNode)
+            for successor in successor:
+                if successor[0] not in hasVisited:
+                    queue.push((successor[0], path + [successor[1]], nodeNum + successor[2]))
+    return []
+
+    
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    fringe = util.PriorityQueue()
+    visited = set()
+    startState = (problem.getStartState(), [], 0)
+    fringe.push(startState, 0)
+
+    while not fringe.isEmpty():
+        currentNode, path, nodeCost = fringe.pop()
+        if currentNode not in visited:
+            visited.add(currentNode)
+            if (problem.isGoalState(currentNode)):
+                return path
+            successors = problem.getSuccessors(currentNode)
+            for state, direc, cost in successors:
+                fringe.push((state, path + [direc], nodeCost + cost), nodeCost + cost)
+
+
+    return []
 
 def nullHeuristic(state, problem=None):
     """
