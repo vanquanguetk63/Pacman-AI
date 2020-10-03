@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        # khoi tao vi tri ban dau va vi tri cac corner
         self.startState = (self.startingPosition, self.corners)
 
     def getStartState(self):
@@ -296,6 +297,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
+        #tra lai vi tri ban dau cua dot
         return self.startState
         util.raiseNotDefined()
 
@@ -304,6 +306,7 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+        # Neu mang state[1] co do dai = 0 thi la goalstate
         return len(state[1]) == 0
         util.raiseNotDefined()
 
@@ -319,6 +322,8 @@ class CornersProblem(search.SearchProblem):
         """
 
         successors = []
+
+
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             # Add a successor state to the successor list if the action is legal
             # Here's a code snippet for figuring out whether a new position hits a wall:
@@ -332,8 +337,8 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
-
             corners = state[1]
+            
             if (nextx, nexty) in corners:
                 for i in range(len(corners)):
                     if corners[i] == (nextx, nexty):
@@ -343,7 +348,6 @@ class CornersProblem(search.SearchProblem):
                 nextState = ((nextx, nexty), corners)
                 cost = 1
                 successors.append( (nextState, action, cost) )
-
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
@@ -379,7 +383,39 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
+    distance = 0
+    cornersLeft = list(state[1])
+    pacman = state[0]
+    closest = 0
+    cornersList = []
+    minI = 0
+    distance_to_nearest = 0
+    total = 0
     
+    if len(cornersLeft) > 0:
+        for i in range(len(cornersLeft)):
+            corner = cornersLeft[i]
+            cornersList.append(abs(pacman[0] - corner[0]) + abs(pacman[1] - corner[1]))
+        distance_to_nearest = min(cornersList)      
+        minI = cornersList.index(distance_to_nearest)
+        closest = cornersLeft[minI]
+      
+        cornersLeft.remove(closest)
+        while len(cornersLeft) > 0:
+          distanceList = []
+          xy1 = closest
+          for i in range(len(cornersLeft)):
+              xy2 = cornersLeft[i]
+              distanceList.append(abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1]))
+          closest2 = min(distanceList)
+          minI = distanceList.index(closest2)
+          closest = cornersLeft[minI]
+          cornersLeft.remove(closest)
+          
+          total = total + closest2
+        distance = distance_to_nearest + total
+      
+    return distance
     # Default to trivial solution
 
 class AStarCornersAgent(SearchAgent):
@@ -474,31 +510,6 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    maximum=-1
-    maxdot=position
-    for food in foodGrid.asList():
-        distance=abs(position[0]-food[0])+abs(position[1]-food[1])
-        if(distance>maximum):
-            maximum=distance
-            maxdot=food
-    dim=position[0]-maxdot[0]
-
-    foodCount=0
-    for food in foodGrid.asList():
-        if dim>0:
-            if (position[0]-food[0])<0 :
-                foodCount+=1
-        elif dim<0:
-            if (position[0]-food[0])>0 :
-                foodCount+=1
-        else:
-            if (position[0]-food[0])!=0 :
-                foodCount+=1
-    
-    if maximum < 0:
-        maximum = 0
-
-    return maximum + foodCount
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -529,10 +540,6 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        startPosition = gameState.getPacmanPosition()
-        food = gameState.getFood()
-        walls = gameState.getWalls()
-        problem = AnyFoodSearchProblem(gameState)
         return search.aStarSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):

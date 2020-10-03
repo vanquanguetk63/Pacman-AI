@@ -103,9 +103,6 @@ def depthFirstSearch(problem):
             for successor in successor:
                 if successor[0] not in hasVisited:
                     stack.push((successor[0], path + [successor[1]], nodeNum + successor[2]))
-
- 
-    
     
 
 def breadthFirstSearch(problem):
